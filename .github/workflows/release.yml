@@ -36,7 +36,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        if [[ "${{matrix.arch}}" == "amd64" ]]; then
+        if [[ "${{matrix.arch}}" == "arm64" ]]; then
           cmake -DWITH_LIBFUSE3=OFF -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk  ..
         else
           cmake -DWITH_LIBFUSE3=OFF ..
@@ -67,7 +67,7 @@ jobs:
         path: unionfs
     - name: prepare release tarball
       run: |
-        tag=$(echo $GITHUB_REF | cut -d/ -f3-)
+        tag=$(echo $GITHUB_REF | sed 's/\//-/g')
         tarball="unionfs-$tag-${{ matrix.os }}-${{ matrix.arch }}.tgz"
         chmod +x unionfs/*
         tar cf - unionfs | gzip > ${tarball}
@@ -98,11 +98,11 @@ jobs:
         echo "tarballs<<EOF" >> $GITHUB_ENV
         for I in $(ls unionfs-tarball);do echo "unionfs-tarball/${I}" >> $GITHUB_ENV; done
         echo "EOF" >> $GITHUB_ENV
-        tag=$(echo $GITHUB_REF | cut -d/ -f3-)
+        tag=$(echo $GITHUB_REF | sed 's/\//-/g')
         echo "tag=${tag}" >> $GITHUB_ENV
         cat $GITHUB_ENV
     - name: push release
-      if: github.event_name == 'push'
+      if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v1
       with:
         name: "unionfs ${{ env.tag }}"
