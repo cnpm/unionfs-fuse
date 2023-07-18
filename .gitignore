@@ -71,3 +71,7 @@ Doxyfile
 # diff rejects
 *.rej
 
+.idea
+.vagrant
+cmake-build-debug
+Vagrantfile
